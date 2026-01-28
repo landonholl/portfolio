@@ -15,6 +15,25 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
   align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+@media (max-width: 980px){
+  .wr-grid{
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 18px;
+  }
+
+  .wr-card{
+    min-height: 200px;
+  }
+  
+  .wr-row{
+    min-height: auto;      /* <-- stop the 60vh “centering box” */
+    padding: 18px 0;
+    align-items: flex-start;
+  }
 }
 
 /* wrapper so hover effects can breathe */
@@ -34,7 +53,7 @@
 /* actual card content */
 .wr-card{
   width: 100%;
-  height: 100%;
+  height: 260px;
   min-height: 260px;   /* ← pick a baseline you like */
   padding: clamp(18px, 2vw, 32px);
   border-radius: 28px;
@@ -44,7 +63,7 @@
   flex-direction: column;   /* IMPORTANT */
   justify-content: flex-start; /* instead of center */
 
-  background: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.55);
   color: #0b0b0b;
 
   transition: transform 220ms cubic-bezier(.2,.9,.2,1),
@@ -102,7 +121,7 @@
   margin: 0 0 10px;
   font-size: clamp(14px, 1vw, 15px);
   font-weight: 600;
-  color: rgba(0,0,0,0.72);
+  color: rgba(0,0,0,0.74);
 }
 
 .wr-body{
@@ -118,7 +137,7 @@
 .wr-card:focus-visible{
   transform: translateY(-.95%) scale(1.01);
   box-shadow: 0 24px 70px rgba(3,6,23,0.28);
-  background: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,.78);
 }
 
 .wr-cardWrap:hover .wr-card::before,
@@ -135,5 +154,6 @@
   }
   .wr-card{
     min-height: 200px;
+    height: 100%;
   }
 }

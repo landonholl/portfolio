@@ -1,3 +1,10 @@
+/* -------- Global reset / no sideways scroll -------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
@@ -9,108 +16,90 @@ body {
   background: #0f0f0f;
   color: #eaeaea;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  /* Prevent horizontal scrolling and allow vertical scrolling when needed */
-  overflow-x: hidden;
-  /* prevent default page vertical scroll - we'll handle scroll inside components */
-  overflow-y: hidden;
+
+  /* kill horizontal scroll even with transforms/max-content */
+  overflow-x: clip;
+  overflow-y: hidden; /* we scroll inside .page */
 }
 
-.container {
-  position: relative;
-  z-index: 1;
-  /* ensure container is at least the viewport height but can grow */
-  min-height: 1vh;
-  box-sizing: border-box;
-  padding: 4rem 4rem;
-  max-width: 900px;
-  margin: 0;
-}
-
-/* ensure the top-level page uses a fixed viewport so we can control internal scroll */
+/* -------- App viewport scroller -------- */
 .page {
-  height: 100vh;
-  overflow: hidden;
+  height: 100svh;
+  overflow-y: auto;
+  overflow-x: clip;
   position: relative;
+
+  /* your “vertical spacing system” */
+  display: flex;
+  flex-direction: column;
+
+  /* global rhythm between hero, cards, etc. */
+  gap: clamp(18px, 4vh, 46px);
+
+  /* IMPORTANT: reserve room for the fixed LogoLoop */
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
 }
 
-h1 {
-  font-size: 3rem;
-  margin-bottom: 0.25rem;
-}
-
+/* background stays fixed behind everything */
 .background {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: clip;
 }
 
+/* -------- Foreground content wrapper (hero only) -------- */
+.container {
+  position: relative;
+  z-index: 1;
+
+  width: min(1100px, 92vw);
+  margin: 0;
+
+  /* no more massive “4rem” on tiny phones */
+  padding-top: calc(84px + env(safe-area-inset-bottom));
+  padding-left: calc(84px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 980px){
+  .container {
+  padding-top: calc(32px + env(safe-area-inset-bottom));
+  padding-left: calc(32px + env(safe-area-inset-bottom));
+}
+}
+
+/* typed header block */
 .hero-type {
-  min-height: 5.5rem;  /* tune until the longest sentence fits without wrapping */
+  /* you wanted less dead space above it on mobile */
+  margin: 0;
+  min-height: 0;
+
   display: flex;
   align-items: flex-start;
 }
 
-
-/* fixed logo strip at bottom-left */
-@media (max-width: 520px) {
-  .site-logo-strip {
-    left: 1rem;
-    bottom: 2.5rem;
-
-    top: auto;              /* IMPORTANT: stop using top */
-    transform: none;        /* IMPORTANT: stop centering translate */
-    width: min(92vw, 320px);
-  }
-}
-
-
-@media (max-width: 520px) {
-  .site-logo-strip {
-    left: 1rem;
-    /* slightly reduced offset on small screens but still lifted above the edge */
-    bottom: 2.5rem;
-    width: 200px;
-  }
-}
-
-.subtitle {
-  color: #aaa;
-  margin-bottom: 2rem;
-}
-
-.links {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-}
-
-.links a {
-  padding: 0.6rem 1.1rem;
-  border: 1px solid #333;
-  border-radius: 6px;
-  color: #eaeaea;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.links a:hover {
-  background: #1a1a1a;
-}
-
-.about h2 {
-  margin-bottom: 0.5rem;
-}
-
-/* Prevent wide images or SVGs from causing horizontal overflow */
-img, svg {
+/* (optional) if your TextType bubble has weird spacing, clamp it */
+.hero-type > * {
   max-width: 100%;
-  height: auto;
-  display: block;
+  min-height: 7.5rem;
+  
 }
 
+/* -------- Fixed LogoLoop strip (your intent) -------- */
+/* You pass className="site-logo-strip" in App.jsx :contentReference[oaicite:4]{index=4} */
+.site-logo-strip {
+  position: fixed;
+  left: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom));
+  z-index: 5;
+}
+
+/* mobile placement */
 @media (max-width: 520px) {
-  .page {
-    padding-top: 7.5rem;
+  .site-logo-strip {
+    left: 1rem;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    width: min(92vw, 320px);
   }
 }

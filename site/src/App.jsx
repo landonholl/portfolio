@@ -27,7 +27,7 @@ export default function App() {
             typingSpeed={25}
             pauseDuration={2300}
             showCursor
-            cursorCharacter="_"
+            cursorCharacter="|"
             texts={["Welcome to React Bits! Good to see you!","Build some amazing experiences!"]}
             deletingSpeed={35}
             cursorBlinkDuration={0.5}
