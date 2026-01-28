@@ -1,0 +1,139 @@
+/* 3-up horizontal card row (no scroll) */
+.wr-row{
+  width: 100%;
+  min-height: 60vh;
+  padding: 28px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wr-grid{
+  width: clamp(900px, 85vw, 1600px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+/* wrapper so hover effects can breathe */
+.wr-cardWrap{
+  position: relative;
+  height: 100%;
+}
+
+/* GlassSurface wrapper styling */
+.wr-glassCard{
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+/* actual card content */
+.wr-card{
+  width: 100%;
+  height: 100%;
+  min-height: 260px;   /* ← pick a baseline you like */
+  padding: clamp(18px, 2vw, 32px);
+  border-radius: 30px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;   /* IMPORTANT */
+  justify-content: flex-start; /* instead of center */
+
+  background: rgba(255,255,255,0.65);
+  color: #0b0b0b;
+
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1),
+              box-shadow 220ms cubic-bezier(.2,.9,.2,1),
+              background 220ms cubic-bezier(.2,.9,.2,1);
+}
+
+
+/* shine sweep */
+.wr-card::before{
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.85), rgba(255,255,255,0) 50%);
+  transform: translateX(-18%) translateY(-10%) rotate(12deg);
+  opacity: 0;
+  transition: opacity 220ms ease, transform 420ms cubic-bezier(.2,.9,.2,1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* border glow */
+.wr-card::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wr-card-content{
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  
+}
+
+.wr-icon{
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  margin: 0 auto 10px;
+}
+
+.wr-title{
+  font-size: clamp(18px, 1.6vw, 26px);
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.wr-sub{
+  margin: 0 0 10px;
+  font-size: clamp(14px, 1vw, 15px);
+  font-weight: 600;
+  color: rgba(0,0,0,0.72);
+}
+
+.wr-body{
+  margin: 0;
+  font-size: clamp(12px, 1.05vw, 16px);
+  line-height: 1.45;
+  color: rgba(0,0,0,0.74);
+  margin-top: auto;
+}
+
+/* hover + keyboard focus */
+.wr-cardWrap:hover .wr-card,
+.wr-card:focus-visible{
+  transform: translateY(-.95%) scale(1.01);
+  box-shadow: 0 24px 70px rgba(3,6,23,0.28);
+  background: rgba(255,255,255,0.96);
+}
+
+.wr-cardWrap:hover .wr-card::before,
+.wr-card:focus-visible::before{
+  opacity: 0.85;
+  transform: translateX(8%) translateY(-18%) rotate(18deg);
+}
+
+/* responsive: stack to 1 column */
+@media (max-width: 980px){
+  .wr-grid{
+    grid-template-columns: 1fr;
+    width: min(760px, 92vw);
+  }
+  .wr-card{
+    min-height: 200px;
+  }
+}

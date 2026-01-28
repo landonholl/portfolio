@@ -1,0 +1,10 @@
+/* Clean baseline for full-screen backgrounds */
+@import './assets/fonts/fonts.css';
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
