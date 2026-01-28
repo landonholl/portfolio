@@ -44,11 +44,11 @@
 }
 
 .text-type__glass .text-type__cursor {
-  color: #ffffff; /* ensure cursor contrasts with tinted background */
+  color: #ffffff; 
 }
 
 .text-type__cursor {
-  position: static !important;   /* prevents the “random middle of screen” cursor */
+  position: static !important; 
   margin-left: 0.15em;
 }
 

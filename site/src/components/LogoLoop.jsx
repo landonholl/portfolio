@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import './LogoLoop.css';
+import GlassSurface from './GlassSurface';
 
 const ANIMATION_CONFIG = { SMOOTH_TAU: 0.25, MIN_COPIES: 2, COPY_HEADROOM: 2 };
 
-const toCssLength = value => (typeof value === 'number' ? `${value}px` : (value ?? undefined));
+const toCssLength = (value) => (typeof value === 'number' ? `${value}px` : (value ?? undefined));
 
 const useResizeObserver = (callback, elements, dependencies) => {
   useEffect(() => {
@@ -13,16 +14,16 @@ const useResizeObserver = (callback, elements, dependencies) => {
       callback();
       return () => window.removeEventListener('resize', handleResize);
     }
-    const observers = elements.map(ref => {
+
+    const observers = elements.map((ref) => {
       if (!ref.current) return null;
       const observer = new ResizeObserver(callback);
       observer.observe(ref.current);
       return observer;
     });
+
     callback();
-    return () => {
-      observers.forEach(observer => observer?.disconnect());
-    };
+    return () => observers.forEach((o) => o?.disconnect());
   }, [callback, elements, dependencies]);
 };
 
@@ -33,34 +34,49 @@ const useImageLoader = (seqRef, onLoad, dependencies) => {
       onLoad();
       return;
     }
-    let remainingImages = images.length;
-    const handleImageLoad = () => {
-      remainingImages -= 1;
-      if (remainingImages === 0) onLoad();
+
+    let remaining = images.length;
+    const done = () => {
+      remaining -= 1;
+      if (remaining === 0) onLoad();
     };
-    images.forEach(img => {
+
+    images.forEach((img) => {
       const htmlImg = img;
-      if (htmlImg.complete) {
-        handleImageLoad();
-      } else {
-        htmlImg.addEventListener('load', handleImageLoad, { once: true });
-        htmlImg.addEventListener('error', handleImageLoad, { once: true });
+      if (htmlImg.complete) done();
+      else {
+        htmlImg.addEventListener('load', done, { once: true });
+        htmlImg.addEventListener('error', done, { once: true });
       }
     });
+
     return () => {
-      images.forEach(img => {
-        img.removeEventListener('load', handleImageLoad);
-        img.removeEventListener('error', handleImageLoad);
+      images.forEach((img) => {
+        img.removeEventListener('load', done);
+        img.removeEventListener('error', done);
       });
     };
   }, [onLoad, seqRef, dependencies]);
 };
 
-const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical) => {
+/**
+ * Animation loop now uses externally-provided offset/velocity refs,
+ * so pointer-drag can control the infinite loop while keeping wraparound.
+ */
+const useAnimationLoop = (
+  trackRef,
+  targetVelocity,
+  seqWidth,
+  seqHeight,
+  isHovered,
+  hoverSpeed,
+  isVertical,
+  offsetRef,
+  velocityRef,
+  draggingRef
+) => {
   const rafRef = useRef(null);
   const lastTimestampRef = useRef(null);
-  const offsetRef = useRef(0);
-  const velocityRef = useRef(0);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -68,51 +84,63 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
 
     const seqSize = isVertical ? seqHeight : seqWidth;
 
-    if (seqSize > 0) {
+    const applyTransform = () => {
+      if (seqSize <= 0) return;
+
+      // keep offset in [0, seqSize)
       offsetRef.current = ((offsetRef.current % seqSize) + seqSize) % seqSize;
-      const transformValue = isVertical
+
+      const t = isVertical
         ? `translate3d(0, ${-offsetRef.current}px, 0)`
         : `translate3d(${-offsetRef.current}px, 0, 0)`;
-      track.style.transform = transformValue;
-    }
+      track.style.transform = t;
+    };
 
-    const animate = timestamp => {
-      if (lastTimestampRef.current === null) {
-        lastTimestampRef.current = timestamp;
-      }
+    // initial paint
+    applyTransform();
 
-      const deltaTime = Math.max(0, timestamp - lastTimestampRef.current) / 1000;
+    const animate = (timestamp) => {
+      if (lastTimestampRef.current === null) lastTimestampRef.current = timestamp;
+
+      const dt = Math.max(0, timestamp - lastTimestampRef.current) / 1000;
       lastTimestampRef.current = timestamp;
 
-      const target = isHovered && hoverSpeed !== undefined ? hoverSpeed : targetVelocity;
+      // While dragging, we DON'T advance offset by velocity.
+      // Drag handlers are directly updating offsetRef.
+      if (!draggingRef.current) {
+        const target = isHovered && hoverSpeed !== undefined ? hoverSpeed : targetVelocity;
 
-      const easingFactor = 1 - Math.exp(-deltaTime / ANIMATION_CONFIG.SMOOTH_TAU);
-      velocityRef.current += (target - velocityRef.current) * easingFactor;
+        const easing = 1 - Math.exp(-dt / ANIMATION_CONFIG.SMOOTH_TAU);
+        velocityRef.current += (target - velocityRef.current) * easing;
 
-      if (seqSize > 0) {
-        let nextOffset = offsetRef.current + velocityRef.current * deltaTime;
-        nextOffset = ((nextOffset % seqSize) + seqSize) % seqSize;
-        offsetRef.current = nextOffset;
-
-        const transformValue = isVertical
-          ? `translate3d(0, ${-offsetRef.current}px, 0)`
-          : `translate3d(${-offsetRef.current}px, 0, 0)`;
-        track.style.transform = transformValue;
+        if (seqSize > 0) {
+          offsetRef.current = offsetRef.current + velocityRef.current * dt;
+        }
       }
 
+      applyTransform();
       rafRef.current = requestAnimationFrame(animate);
     };
 
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
       lastTimestampRef.current = null;
     };
-  }, [targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical, trackRef]);
+  }, [
+    trackRef,
+    targetVelocity,
+    seqWidth,
+    seqHeight,
+    isHovered,
+    hoverSpeed,
+    isVertical,
+    offsetRef,
+    velocityRef,
+    draggingRef
+  ]);
 };
 
 export const LogoLoop = memo(
@@ -131,7 +159,8 @@ export const LogoLoop = memo(
     renderItem,
     ariaLabel = 'Partner logos',
     className,
-    style
+    style,
+    swipe = 'auto' // true/false/"auto"
   }) => {
     const containerRef = useRef(null);
     const trackRef = useRef(null);
@@ -139,8 +168,13 @@ export const LogoLoop = memo(
 
     const [seqWidth, setSeqWidth] = useState(0);
     const [seqHeight, setSeqHeight] = useState(0);
-    const [copyCount, setCopyCount] = useState(ANIMATION_CONFIG.MIN_COPIES);
+    const [copyCount, setCopyCount] = useState(1);
     const [isHovered, setIsHovered] = useState(false);
+
+    // shared motion refs (drag + loop)
+    const offsetRef = useRef(0);
+    const velocityRef = useRef(0);
+    const draggingRef = useRef(false);
 
     const effectiveHoverSpeed = useMemo(() => {
       if (hoverSpeed !== undefined) return hoverSpeed;
@@ -151,30 +185,36 @@ export const LogoLoop = memo(
 
     const isVertical = direction === 'up' || direction === 'down';
 
+    const isSwipe = useMemo(() => {
+      if (swipe === true) return true;
+      if (swipe === false) return false;
+      return typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+    }, [swipe]);
+
     const targetVelocity = useMemo(() => {
       const magnitude = Math.abs(speed);
-      let directionMultiplier;
-      if (isVertical) {
-        directionMultiplier = direction === 'up' ? 1 : -1;
-      } else {
-        directionMultiplier = direction === 'left' ? 1 : -1;
-      }
-      const speedMultiplier = speed < 0 ? -1 : 1;
-      return magnitude * directionMultiplier * speedMultiplier;
+      let dirMul;
+      if (isVertical) dirMul = direction === 'up' ? 1 : -1;
+      else dirMul = direction === 'left' ? 1 : -1;
+      const speedMul = speed < 0 ? -1 : 1;
+      return magnitude * dirMul * speedMul;
     }, [speed, direction, isVertical]);
 
     const updateDimensions = useCallback(() => {
       const containerWidth = containerRef.current?.clientWidth ?? 0;
-      const sequenceRect = seqRef.current?.getBoundingClientRect?.();
-      const sequenceWidth = sequenceRect?.width ?? 0;
-      const sequenceHeight = sequenceRect?.height ?? 0;
+      const rect = seqRef.current?.getBoundingClientRect?.();
+      const sequenceWidth = rect?.width ?? 0;
+      const sequenceHeight = rect?.height ?? 0;
+
       if (isVertical) {
         const parentHeight = containerRef.current?.parentElement?.clientHeight ?? 0;
         if (containerRef.current && parentHeight > 0) {
-          const targetHeight = Math.ceil(parentHeight);
-          if (containerRef.current.style.height !== `${targetHeight}px`)
-            containerRef.current.style.height = `${targetHeight}px`;
+          const targetH = Math.ceil(parentHeight);
+          if (containerRef.current.style.height !== `${targetH}px`) {
+            containerRef.current.style.height = `${targetH}px`;
+          }
         }
+
         if (sequenceHeight > 0) {
           setSeqHeight(Math.ceil(sequenceHeight));
           const viewport = containerRef.current?.clientHeight ?? parentHeight ?? sequenceHeight;
@@ -189,10 +229,135 @@ export const LogoLoop = memo(
     }, [isVertical]);
 
     useResizeObserver(updateDimensions, [containerRef, seqRef], [logos, gap, logoHeight, isVertical]);
-
     useImageLoader(seqRef, updateDimensions, [logos, gap, logoHeight, isVertical]);
 
-    useAnimationLoop(trackRef, targetVelocity, seqWidth, seqHeight, isHovered, effectiveHoverSpeed, isVertical);
+    // infinite loop animation always on (drag just takes control of offsetRef)
+    useAnimationLoop(
+      trackRef,
+      targetVelocity,
+      seqWidth,
+      seqHeight,
+      isHovered,
+      effectiveHoverSpeed,
+      isVertical,
+      offsetRef,
+      velocityRef,
+      draggingRef
+    );
+
+    // Pointer-drag that still preserves infinite loop (updates offsetRef)
+    useEffect(() => {
+      if (!isSwipe) return;
+
+      const el = containerRef.current;
+      if (!el) return;
+
+      const DRAG_THRESHOLD = 6; // px
+
+      let activePointerId = null;
+      let startAxis = 0;
+      let startOffset = 0;
+
+      let lastAxis = 0;
+      let lastT = 0;
+      let lastVel = 0;
+
+      let didDrag = false;
+      let startedOnLink = false;
+
+      const axisOf = (e) => (isVertical ? e.clientY : e.clientX);
+
+      const onDown = (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        activePointerId = e.pointerId;
+
+        startAxis = axisOf(e);
+        startOffset = offsetRef.current;
+
+        lastAxis = startAxis;
+        lastT = performance.now();
+        lastVel = 0;
+
+        didDrag = false;
+        startedOnLink = !!e.target?.closest?.('a.logoloop__link');
+
+        // Do NOT capture / do NOT set draggingRef yet.
+      };
+
+      const onMove = (e) => {
+        if (activePointerId === null || e.pointerId !== activePointerId) return;
+
+        const axis = axisOf(e);
+        const delta = axis - startAxis;
+
+        if (!didDrag) {
+          if (Math.abs(delta) < DRAG_THRESHOLD) return;
+
+          didDrag = true;
+
+          el.setPointerCapture?.(activePointerId);
+          draggingRef.current = true;
+          el.classList.add('logoloop--dragging');
+
+          // stop auto easing while user grabs
+          velocityRef.current = 0;
+        }
+
+        offsetRef.current = startOffset - delta;
+
+        const now = performance.now();
+        const dt = Math.max(1, now - lastT);
+        lastVel = ((axis - lastAxis) / dt) * 1000;
+        lastAxis = axis;
+        lastT = now;
+
+        // Once we are actually dragging, prevent default so it doesn't scroll/click.
+        e.preventDefault?.();
+      };
+
+      const end = (e) => {
+        if (activePointerId === null || e.pointerId !== activePointerId) return;
+
+        if (didDrag) {
+          el.releasePointerCapture?.(activePointerId);
+
+          draggingRef.current = false;
+          el.classList.remove('logoloop--dragging');
+
+          const momentum = Math.max(-1400, Math.min(1400, -lastVel));
+          velocityRef.current = momentum;
+        }
+
+        activePointerId = null;
+        didDrag = false;
+        startedOnLink = false;
+      };
+
+      // This cancels the click ONLY when a drag happened (so links still work on tap/click).
+      const onClickCapture = (e) => {
+        if (!draggingRef.current && !didDrag) return;
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      el.addEventListener('pointerdown', onDown, { passive: false });
+      el.addEventListener('pointermove', onMove, { passive: false });
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+
+      // capture clicks so we can suppress navigation after a drag
+      el.addEventListener('click', onClickCapture, true);
+
+      return () => {
+        el.removeEventListener('pointerdown', onDown);
+        el.removeEventListener('pointermove', onMove);
+        el.removeEventListener('pointerup', end);
+        el.removeEventListener('pointercancel', end);
+        el.removeEventListener('click', onClickCapture, true);
+      };
+    }, [isSwipe, isVertical]);
+
 
     const cssVariables = useMemo(
       () => ({
@@ -210,16 +375,18 @@ export const LogoLoop = memo(
           isVertical ? 'logoloop--vertical' : 'logoloop--horizontal',
           fadeOut && 'logoloop--fade',
           scaleOnHover && 'logoloop--scale-hover',
+          isSwipe && 'logoloop--swipe',
           className
         ]
           .filter(Boolean)
           .join(' '),
-      [isVertical, fadeOut, scaleOnHover, className]
+      [isVertical, fadeOut, scaleOnHover, isSwipe, className]
     );
 
     const handleMouseEnter = useCallback(() => {
       if (effectiveHoverSpeed !== undefined) setIsHovered(true);
     }, [effectiveHoverSpeed]);
+
     const handleMouseLeave = useCallback(() => {
       if (effectiveHoverSpeed !== undefined) setIsHovered(false);
     }, [effectiveHoverSpeed]);
@@ -233,7 +400,9 @@ export const LogoLoop = memo(
             </li>
           );
         }
+
         const isNodeItem = 'node' in item;
+
         const content = isNodeItem ? (
           <span className="logoloop__node" aria-hidden={!!item.href && !item.ariaLabel}>
             {item.node}
@@ -252,7 +421,9 @@ export const LogoLoop = memo(
             draggable={false}
           />
         );
+
         const itemAriaLabel = isNodeItem ? (item.ariaLabel ?? item.title) : (item.alt ?? item.title);
+
         const itemContent = item.href ? (
           <a
             className="logoloop__link"
@@ -260,17 +431,34 @@ export const LogoLoop = memo(
             aria-label={itemAriaLabel || 'logo link'}
             target="_blank"
             rel="noreferrer noopener"
+            draggable={false}
           >
             {content}
           </a>
         ) : (
           content
         );
-        return (
-          <li className="logoloop__item" key={key} role="listitem">
-            {itemContent}
-          </li>
-        );
+
+      return (
+        <li className="logoloop__item" key={key} role="listitem">
+          <GlassSurface
+            className="logoloop__chipGlass"
+            width="var(--logoloop-chipSize)"
+            height="var(--logoloop-chipSize)"
+            borderRadius={999}
+            backgroundOpacity={0.10}
+            blur={8}
+            saturation={1.1}
+            displace={0.18}
+            style={{ display: 'inline-flex' }}
+          >
+            <div className="logoloop__chipInner">
+              {itemContent}
+            </div>
+          </GlassSurface>
+        </li>
+      );
+
       },
       [renderItem]
     );
@@ -299,21 +487,35 @@ export const LogoLoop = memo(
             : toCssLength(width)
           : (toCssLength(width) ?? '100%'),
         ...cssVariables,
-        ...style
+        ...style,
+        // allow page scroll in the opposite axis while still supporting drag
+        touchAction: isVertical ? 'pan-x' : 'pan-y',
+        cursor: isSwipe ? 'grab' : undefined
       }),
-      [width, cssVariables, style, isVertical]
+      [width, cssVariables, style, isVertical, isSwipe]
     );
 
     return (
-      <div ref={containerRef} className={rootClassName} style={containerStyle} role="region" aria-label={ariaLabel}>
-        <div className="logoloop__track" ref={trackRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <div
+        ref={containerRef}
+        className={rootClassName}
+        style={containerStyle}
+        role="region"
+        aria-label={ariaLabel}
+      >
+        <div
+          className="logoloop__track"
+          ref={trackRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           {logoLists}
         </div>
       </div>
     );
+
   }
 );
 
 LogoLoop.displayName = 'LogoLoop';
-
 export default LogoLoop;

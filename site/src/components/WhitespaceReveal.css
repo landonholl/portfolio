@@ -30,19 +30,17 @@
   }
   
   .wr-row{
-    min-height: auto;      /* <-- stop the 60vh “centering box” */
+    min-height: auto;
     padding: 18px 0;
     align-items: flex-start;
   }
 }
 
-/* wrapper so hover effects can breathe */
 .wr-cardWrap{
   position: relative;
   height: 100%;
 }
 
-/* GlassSurface wrapper styling */
 .wr-glassCard{
   width: 100%;
   height: 100%;
@@ -50,18 +48,17 @@
   overflow: hidden;
 }
 
-/* actual card content */
 .wr-card{
   width: 100%;
   height: 260px;
-  min-height: 260px;   /* ← pick a baseline you like */
+  min-height: 260px;  
   padding: clamp(18px, 2vw, 32px);
   border-radius: 28px;
   box-sizing: border-box;
 
   display: flex;
-  flex-direction: column;   /* IMPORTANT */
-  justify-content: flex-start; /* instead of center */
+  flex-direction: column;  
+  justify-content: flex-start; 
 
   background: rgba(255,255,255,0.55);
   color: #0b0b0b;
@@ -70,7 +67,6 @@
               box-shadow 220ms cubic-bezier(.2,.9,.2,1),
               background 220ms cubic-bezier(.2,.9,.2,1);
 }
-
 
 /* shine sweep */
 .wr-card::before{

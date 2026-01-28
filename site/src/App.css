@@ -29,14 +29,11 @@ body {
   overflow-x: clip;
   position: relative;
 
-  /* your “vertical spacing system” */
   display: flex;
   flex-direction: column;
 
-  /* global rhythm between hero, cards, etc. */
   gap: clamp(18px, 4vh, 46px);
 
-  /* IMPORTANT: reserve room for the fixed LogoLoop */
   padding-bottom: calc(48px + env(safe-area-inset-bottom));
 }
 
@@ -57,7 +54,6 @@ body {
   width: min(1100px, 92vw);
   margin: 0;
 
-  /* no more massive “4rem” on tiny phones */
   padding-top: calc(84px + env(safe-area-inset-bottom));
   padding-left: calc(84px + env(safe-area-inset-bottom));
 }
@@ -66,7 +62,7 @@ body {
   .container {
   padding-top: calc(32px + env(safe-area-inset-bottom));
   padding-left: calc(32px + env(safe-area-inset-bottom));
-}
+  }
 }
 
 /* typed header block */
@@ -79,15 +75,12 @@ body {
   align-items: flex-start;
 }
 
-/* (optional) if your TextType bubble has weird spacing, clamp it */
 .hero-type > * {
   max-width: 100%;
   min-height: 7.5rem;
-  
+
 }
 
-/* -------- Fixed LogoLoop strip (your intent) -------- */
-/* You pass className="site-logo-strip" in App.jsx :contentReference[oaicite:4]{index=4} */
 .site-logo-strip {
   position: fixed;
   left: 2rem;
@@ -95,7 +88,6 @@ body {
   z-index: 5;
 }
 
-/* mobile placement */
 @media (max-width: 520px) {
   .site-logo-strip {
     left: 1rem;

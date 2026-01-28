@@ -9,6 +9,9 @@ import YoutubeLogo from './assets/logos/YouTube_Symbol_0.svg'
 import TextType from './components/TextType'
 
 export default function App() {
+
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 520px)').matches;
+
   return (
     <div className="page">
       {/* background layer */}
@@ -44,13 +47,14 @@ export default function App() {
           { src: GitHubLogo, href: 'https://github.com/landonholl', alt: 'GitHub' },
           { src: LinkedInLogo, href: 'https://linkedin.com/in/landon-holland-743113159', alt: 'LinkedIn' },
           { src: InstagramLogo, href: 'https://www.instagram.com/reallandonholland', alt: 'Instagram' },
-          { src: YoutubeLogo, href: 'https://www.youtube.com/@Bilbo12', alt: 'YouTube' }
+          //{ src: YoutubeLogo, href: 'https://www.youtube.com/@Bilbo12', alt: 'YouTube' }
         ]}
         width={2048}
         logoHeight={36}
-        gap={180}
+        gap={isMobile ? 120 : 280}
         speed={64}
         pauseOnHover={true}
+        swipe={true}
       />
     </div>
   )

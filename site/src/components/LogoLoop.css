@@ -4,7 +4,8 @@
   --logoloop-gap: 32px;
   --logoloop-logoHeight: 28px;
   --logoloop-fadeColorAuto: #ffffff;
-  padding-top: 3.5rem;
+  padding-top: 1.5rem;
+  --logoloop-chipSize: calc(var(--logoloop-logoHeight) + 48px);
 }
 
 .logoloop--vertical {
@@ -12,10 +13,6 @@
   display: inline-block;
 }
 
-.logoloop--scale-hover {
-  padding-top: calc(var(--logoloop-logoHeight) * 0.1);
-  padding-bottom: calc(var(--logoloop-logoHeight) * 0.1);
-}
 
 @media (prefers-color-scheme: dark) {
   .logoloop {
@@ -101,12 +98,13 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.logoloop__link {
-  display: inline-flex;
+.logoloop__link{
+  width: 100%;
+  height: 100%;
+  display: flex;
   align-items: center;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: opacity 0.2s ease;
+  justify-content: center;
+  border-radius: inherit;
 }
 
 .logoloop__link:hover {
@@ -202,3 +200,53 @@
 .logo-loop__glass .logo-loop__cursor {
   color: #ffffff; /* ensure cursor contrasts with tinted background */
 }
+
+.logoloop__chipGlass{
+  position: relative;          /* needed for ::after */
+  width: var(--logoloop-chipSize);
+  height: var(--logoloop-chipSize);
+  border-radius: 999px;
+  overflow: hidden;
+  display: inline-flex;
+}
+
+/* center everything inside the circle */
+.logoloop__chipInner{
+  width: 100%;
+  height: 100%;
+  padding: 0;                 
+  border-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* subtle inset border */
+.logoloop__chipGlass::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: 300px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset;
+  pointer-events:none;
+}
+
+/* subtle "floating" shadow */
+.logoloop__item img,
+.logoloop__node {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+}
+
+@media (max-width: 520px) {
+  .logoloop__item img,
+  .logoloop__node {
+    filter:
+      drop-shadow(0 0 6px rgba(0,0,0,0.38))
+      drop-shadow(0 1px 2px rgba(0,0,0,0.28));
+  }
+}
+
+.logoloop__link:hover { opacity: 1; }
+
+.logoloop--swipe { user-select: none; }
+.logoloop--dragging { cursor: grabbing !important; }
