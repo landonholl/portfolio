@@ -56,7 +56,6 @@
   pointer-events: auto;
 }
 
-/* expand/contract effect (keep it subtle) */
 .corner-mark.is-expanded{
   padding: calc(0.62rem * var(--corner-scale, 1)) calc(0.86rem * var(--corner-scale, 1));
 }

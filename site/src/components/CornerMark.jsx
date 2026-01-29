@@ -37,11 +37,11 @@ export default function CornerMark({
   className = '',
   style = {},
   copiedMs = 1400,
-  flashyMs = 260, // <-- NEW: pulse duration
+  flashyMs = 260,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [pulse, setPulse] = useState(false); // <-- NEW
+  const [pulse, setPulse] = useState(false);
   const timerRef = useRef(null);
   const pulseRef = useRef(null);
 
@@ -88,7 +88,7 @@ export default function CornerMark({
         visible ? 'is-visible' : '',
         expanded ? 'is-expanded' : '',
         copied ? 'is-copied' : '',
-        pulse ? 'is-pulse' : '',   // <-- NEW
+        pulse ? 'is-pulse' : '',
         className
       ].join(' ')}
       onClick={onActivate}

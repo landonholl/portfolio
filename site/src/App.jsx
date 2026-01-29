@@ -24,7 +24,6 @@ export default function App() {
     const io = new IntersectionObserver(
       ([entry]) => setAtBottom(entry.isIntersecting),
       {
-        // show when you’re basically at the bottom; adjust to taste
         root: null,
         threshold: 1
       }
