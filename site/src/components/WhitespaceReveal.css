@@ -1,8 +1,8 @@
 /* 3-up horizontal card row (no scroll) */
 .wr-row{
   width: 100%;
-  min-height: 60vh;
-  padding: 28px 0;
+  min-height: 60svh;
+  padding: 22px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,14 +15,14 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
   align-items: stretch;
-  grid-auto-rows: 1fr;
+  grid-auto-rows: auto;
 }
 
 @media (max-width: 980px){
   .wr-grid{
     grid-template-columns: 1fr;
     width: 100%;
-    gap: 18px;
+    gap: 22px;
   }
 
   .wr-card{
