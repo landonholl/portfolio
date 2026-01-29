@@ -431,6 +431,7 @@ export const LogoLoop = memo(
             aria-label={itemAriaLabel || 'logo link'}
             target="_blank"
             rel="noreferrer noopener"
+            download={item.download ? (item.downloadName ?? '') : undefined}
             draggable={false}
           >
             {content}

@@ -5,7 +5,7 @@ import WhitespaceReveal from './components/WhitespaceReveal'
 import GitHubLogo from './assets/logos/GitHub_Invertocat_White_Clearspace.svg'
 import LinkedInLogo from './assets/logos/InBug-White.png'
 import InstagramLogo from './assets/logos/Instagram_Glyph_White.svg'
-import YoutubeLogo from './assets/logos/YouTube_Symbol_0.svg'
+import ResumeDownloadIcon from './assets/logos/filedownload.svg'
 import TextType from './components/TextType'
 
 export default function App() {
@@ -47,7 +47,11 @@ export default function App() {
           { src: GitHubLogo, href: 'https://github.com/landonholl', alt: 'GitHub' },
           { src: LinkedInLogo, href: 'https://linkedin.com/in/landon-holland-743113159', alt: 'LinkedIn' },
           { src: InstagramLogo, href: 'https://www.instagram.com/reallandonholland', alt: 'Instagram' },
-          //{ src: YoutubeLogo, href: 'https://www.youtube.com/@Bilbo12', alt: 'YouTube' }
+          { src: ResumeDownloadIcon,
+            href: '/LandonHollandResume.pdf', 
+            alt: 'Resume', 
+            download: true, 
+            downloadName: 'Landon_Holland_Resume.pdf' }
         ]}
         width={2048}
         logoHeight={36}
