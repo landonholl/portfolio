@@ -1,0 +1,120 @@
+.corner-mark{
+  position: fixed;
+  right: calc(1.25rem + env(safe-area-inset-right));
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  z-index: 6;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+
+  padding: calc(0.55rem * var(--corner-scale, 1)) calc(0.75rem * var(--corner-scale, 1));
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+
+  color: #fff;
+  mix-blend-mode: difference;
+
+  font-size: calc(12px * var(--corner-scale, 1));
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+
+  user-select: none;
+  pointer-events: none;
+  cursor: pointer;
+
+  /* hidden by default (fades in at bottom) */
+  opacity: 0;
+  transform: translateY(6px) scale(0.995);
+  transition:
+    opacity 220ms ease,
+    transform 240ms cubic-bezier(.2,.9,.2,1),
+    padding 240ms cubic-bezier(.2,.9,.2,1),
+    background 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    filter 240ms ease;
+}
+
+/* remove default button styling */
+.corner-mark{
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.corner-mark.is-visible{
+  opacity: var(--corner-opacity, 0.88);
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* expand/contract effect (keep it subtle) */
+.corner-mark.is-expanded{
+  padding: calc(0.62rem * var(--corner-scale, 1)) calc(0.86rem * var(--corner-scale, 1));
+}
+
+/* micro “sheen” flash using a pseudo element */
+.corner-mark::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-14%) skewX(-18deg);
+  background: linear-gradient(
+    110deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.10) 35%,
+    rgba(255,255,255,0.18) 50%,
+    rgba(255,255,255,0.10) 65%,
+    rgba(255,255,255,0) 100%
+  );
+}
+
+/* the “flashier” click: tiny glow + quick sheen sweep */
+.corner-mark.is-pulse{
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 10px 30px rgba(255,255,255,0.06);
+  filter: saturate(1.08);
+}
+.corner-mark.is-pulse::after{
+  opacity: 1;
+  animation: cornerSheen 260ms cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+@keyframes cornerSheen{
+  from { transform: translateX(-18%) skewX(-18deg); opacity: 0.0; }
+  30% { opacity: 0.9; }
+  to { transform: translateX(18%) skewX(-18deg); opacity: 0.0; }
+}
+
+/* tiny “press” feel */
+.corner-mark:active{
+  transform: translateY(0) scale(0.99);
+}
+
+.corner-mark:focus-visible{
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.18);
+}
+
+.corner-mark__label{
+  position: relative;
+  z-index: 1;
+}
+
+/* keep it tasteful on tiny screens */
+@media (max-width: 520px){
+  .corner-mark{
+    right: calc(0.9rem + env(safe-area-inset-right));
+    bottom: calc(0.9rem + env(safe-area-inset-bottom));
+    font-size: calc(11px * var(--corner-scale, 1));
+  }
+}

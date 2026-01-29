@@ -28,6 +28,7 @@ body {
   overflow-y: auto;
   overflow-x: clip;
   position: relative;
+  isolation: isolate;
 
   display: flex;
   flex-direction: column;

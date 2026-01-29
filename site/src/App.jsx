@@ -7,10 +7,32 @@ import LinkedInLogo from './assets/logos/InBug-White.png'
 import InstagramLogo from './assets/logos/Instagram_Glyph_White.svg'
 import ResumeDownloadIcon from './assets/logos/filedownload.svg'
 import TextType from './components/TextType'
+import CornerMark from './components/CornerMark.jsx'
+
+import { useEffect, useRef, useState } from 'react';
 
 export default function App() {
 
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 520px)').matches;
+
+  const bottomRef = useRef(null);
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    if (!bottomRef.current) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => setAtBottom(entry.isIntersecting),
+      {
+        // show when you’re basically at the bottom; adjust to taste
+        root: null,
+        threshold: 1
+      }
+    );
+
+    io.observe(bottomRef.current);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div className="page">
@@ -60,6 +82,8 @@ export default function App() {
         pauseOnHover={true}
         swipe={true}
       />
+     <CornerMark visible={atBottom} scale={0.95} />
+     <div ref={bottomRef} style={{ height: 1 }} />
     </div>
   )
 }
