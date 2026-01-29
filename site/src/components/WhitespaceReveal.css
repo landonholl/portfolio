@@ -1,7 +1,8 @@
 /* 3-up horizontal card row (no scroll) */
 .wr-row{
   width: 100%;
-  min-height: 60svh;
+  flex: 1;
+  min-height: 320px;
   padding: 22px 0;
   display: flex;
   justify-content: center;
@@ -60,7 +61,7 @@
   flex-direction: column;  
   justify-content: flex-start; 
 
-  background: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.35);
   color: #0b0b0b;
 
   transition: transform 220ms cubic-bezier(.2,.9,.2,1),
@@ -131,9 +132,9 @@
 /* hover + keyboard focus */
 .wr-cardWrap:hover .wr-card,
 .wr-card:focus-visible{
-  transform: translateY(-.95%) scale(1.01);
+  transform: scale(1.015);
   box-shadow: 0 24px 70px rgba(3,6,23,0.28);
-  background: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.69);
 }
 
 .wr-cardWrap:hover .wr-card::before,
