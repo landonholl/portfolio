@@ -51,7 +51,7 @@
 
 .wr-card{
   width: 100%;
-  height: 260px;
+  height: 280px;
   min-height: 260px;  
   padding: clamp(18px, 2vw, 32px);
   border-radius: 28px;
@@ -98,7 +98,8 @@
   position: relative;
   z-index: 1;
   text-align: center;
-  
+  margin: -10px 0 12px;
+
 }
 
 .wr-icon{
@@ -109,14 +110,14 @@
 }
 
 .wr-title{
-  font-size: clamp(18px, 1.6vw, 26px);
+  font-size: clamp(26px, 1.6vw, 30px);
   font-weight: 600;
-  margin: 0 0 6px;
+  margin: 0 0 10px;
 }
 
 .wr-sub{
   margin: 0 0 10px;
-  font-size: clamp(14px, 1vw, 15px);
+  font-size: clamp(15px, 1vw, 17px);
   font-weight: 600;
   color: rgba(0,0,0,0.74);
 }
@@ -132,7 +133,8 @@
 /* hover + keyboard focus */
 .wr-cardWrap:hover .wr-card,
 .wr-card:focus-visible{
-  transform: scale(1.015);
+  transform: scaleX(1.01) scaleY(1.0225);
+  border-radius: 32px;
   box-shadow: 0 24px 70px rgba(3,6,23,0.28);
   background: rgba(255,255,255,.69);
 }
@@ -153,4 +155,8 @@
     min-height: 200px;
     height: 100%;
   }
+  .wr-card-content{
+    margin: 0 0 12px;
+  }
 }
+
