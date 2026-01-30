@@ -28,10 +28,22 @@ The site is intended for recruiters, collaborators, and anyone interested in my 
 - **Hosting:** AWS S3 (static site hosting)
 - **Performance & SEO:** Optimized asset delivery, metadata, sitemap, and search indexing
 
----
+The production build outputs static assets suitable for deployment to S3 or any static hosting provider.
 
-## Development
+## Deployment
 
-### Install dependencies
-```bash
-yarn
+The site is deployed as a static build to AWS S3 and served over HTTPS.
+Supporting files such as robots.txt and sitemap.xml are included to enable proper search engine indexing.
+
+## License
+
+This repository is provided for reference and portfolio purposes.
+All rights reserved unless otherwise stated.
+
+## Contact
+
+Website: https://landonholland.com
+
+GitHub: https://github.com/landonholl
+
+LinkedIn: https://linkedin.com/in/landon-holland-743113159
