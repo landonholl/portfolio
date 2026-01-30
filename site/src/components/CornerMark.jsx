@@ -31,18 +31,20 @@ async function copyToClipboard(text) {
 export default function CornerMark({
   name = 'Landon Holland',
   year = new Date().getFullYear(),
+  visible = true,
   scale = 1,
   opacity = 0.88,
-  visible = true,
-  className = '',
-  style = {},
   copiedMs = 1400,
   flashyMs = 260,
+  className = '',
+  style = {},
 }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const [maxW, setMaxW] = useState(null);
+
+  // measured width in px (includes padding)
+  const [w, setW] = useState(null);
 
   const timerRef = useRef(null);
   const pulseRef = useRef(null);
@@ -50,26 +52,31 @@ export default function CornerMark({
 
   const defaultText = useMemo(() => `© ${name} ${year}`, [name, year]);
   const copiedText = 'E-mail address copied to clipboard!';
-
   const currentText = copied ? copiedText : defaultText;
 
-  // measure text width whenever it changes (and on scale changes)
+  // Measure the *actual rendered* text width on-device and keep updated
   useEffect(() => {
-    if (!measureRef.current) return;
-    // requestAnimationFrame ensures DOM updated before measuring
-    const id = requestAnimationFrame(() => {
-      const w = Math.ceil(measureRef.current.getBoundingClientRect().width);
-      setMaxW(w);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [currentText, scale]);
+    const el = measureRef.current;
+    if (!el) return;
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-      if (pulseRef.current) window.clearTimeout(pulseRef.current);
+    const update = () => {
+      // +1-2px safety for iOS rounding
+      const px = Math.ceil(el.getBoundingClientRect().width) + 2;
+      setW(px);
     };
-  }, []);
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+
+    // if fonts load after first render, re-measure
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(update).catch(() => {});
+    }
+
+    return () => ro.disconnect();
+  }, [currentText, scale]);
 
   const onActivate = useCallback(async () => {
     setExpanded(true);
@@ -88,12 +95,12 @@ export default function CornerMark({
     }, copiedMs);
   }, [copiedMs, flashyMs]);
 
-  const onKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onActivate();
-    }
-  }, [onActivate]);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (pulseRef.current) window.clearTimeout(pulseRef.current);
+    };
+  }, []);
 
   return (
     <button
@@ -107,19 +114,18 @@ export default function CornerMark({
         className
       ].join(' ')}
       onClick={onActivate}
-      onKeyDown={onKeyDown}
       aria-label="Copy email address"
       style={{
         '--corner-scale': scale,
         '--corner-opacity': opacity,
-        '--corner-maxw': maxW ? `${maxW}px` : 'auto',
+        // width = measured text width + your horizontal padding (we add padding in CSS, so measure text only)
+        '--corner-w': w ? `${w}px` : 'auto',
         ...style
       }}
     >
-      {/* this is what users see */}
       <span className="corner-mark__label">{currentText}</span>
 
-      {/* hidden measurer (same font/styles), used only to get target width */}
+      {/* Hidden measurer: same font + same text, no padding */}
       <span className="corner-mark__measure" ref={measureRef} aria-hidden="true">
         {currentText}
       </span>

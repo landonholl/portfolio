@@ -30,7 +30,7 @@
   pointer-events: none;
   cursor: pointer;
 
-  width: 150px;
+  width: calc(var(--corner-w, 0px) + (2 * calc(0.75rem * var(--corner-scale, 1))));
 
   /* hidden by default (fades in at bottom) */
   opacity: 0;
@@ -131,6 +131,8 @@
   pointer-events: none;
   height: 0;
   overflow: hidden;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 /* keep it tasteful on tiny screens */
@@ -140,8 +142,5 @@
     bottom: calc(0.9rem + env(safe-area-inset-bottom));
     font-size: calc(11px * var(--corner-scale, 1));
   }
-
-  .corner-mark{ width: min(92vw, 140px); }
-  .corner-mark.is-copied{ width: min(92vw, 200px); }
 }
 
