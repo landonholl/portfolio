@@ -1,4 +1,4 @@
-# landonholland.com
+landonholland.com
 
 This repository contains the source code for my personal portfolio website:  
 https://landonholland.com
