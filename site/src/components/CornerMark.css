@@ -30,10 +30,13 @@
   pointer-events: none;
   cursor: pointer;
 
+  width: 150px;
+
   /* hidden by default (fades in at bottom) */
   opacity: 0;
   transform: translateY(6px) scale(0.995);
   transition:
+    width 260ms cubic-bezier(.2,.9,.2,1),
     opacity 220ms ease,
     transform 240ms cubic-bezier(.2,.9,.2,1),
     padding 240ms cubic-bezier(.2,.9,.2,1),
@@ -41,6 +44,10 @@
     border-color 240ms ease,
     box-shadow 240ms ease,
     filter 240ms ease;
+}
+
+.corner-mark.is-copied{
+  width: 215px; /* big enough for the copied message */
 }
 
 /* remove default button styling */
@@ -109,6 +116,23 @@
   z-index: 1;
 }
 
+.corner-mark__label{
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* hidden measuring span (if you're using the JS measuring approach) */
+.corner-mark__measure{
+  position: absolute;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+
 /* keep it tasteful on tiny screens */
 @media (max-width: 520px){
   .corner-mark{
@@ -116,4 +140,8 @@
     bottom: calc(0.9rem + env(safe-area-inset-bottom));
     font-size: calc(11px * var(--corner-scale, 1));
   }
+
+  .corner-mark{ width: min(92vw, 140px); }
+  .corner-mark.is-copied{ width: min(92vw, 200px); }
 }
+

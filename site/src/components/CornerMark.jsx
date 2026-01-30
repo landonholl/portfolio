@@ -42,10 +42,27 @@ export default function CornerMark({
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pulse, setPulse] = useState(false);
+  const [maxW, setMaxW] = useState(null);
+
   const timerRef = useRef(null);
   const pulseRef = useRef(null);
+  const measureRef = useRef(null);
 
   const defaultText = useMemo(() => `© ${name} ${year}`, [name, year]);
+  const copiedText = 'E-mail address copied to clipboard!';
+
+  const currentText = copied ? copiedText : defaultText;
+
+  // measure text width whenever it changes (and on scale changes)
+  useEffect(() => {
+    if (!measureRef.current) return;
+    // requestAnimationFrame ensures DOM updated before measuring
+    const id = requestAnimationFrame(() => {
+      const w = Math.ceil(measureRef.current.getBoundingClientRect().width);
+      setMaxW(w);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [currentText, scale]);
 
   useEffect(() => {
     return () => {
@@ -61,9 +78,7 @@ export default function CornerMark({
     if (pulseRef.current) window.clearTimeout(pulseRef.current);
     pulseRef.current = window.setTimeout(() => setPulse(false), flashyMs);
 
-    const email = decodeEmail();
-    const ok = await copyToClipboard(email);
-
+    const ok = await copyToClipboard(decodeEmail());
     setCopied(ok);
 
     if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -97,12 +112,17 @@ export default function CornerMark({
       style={{
         '--corner-scale': scale,
         '--corner-opacity': opacity,
+        '--corner-maxw': maxW ? `${maxW}px` : 'auto',
         ...style
       }}
     >
-    <span className="corner-mark__label" style={{ display: 'block' }}>
-     {copied ? 'Email address copied!' : defaultText}
-    </span>
+      {/* this is what users see */}
+      <span className="corner-mark__label">{currentText}</span>
+
+      {/* hidden measurer (same font/styles), used only to get target width */}
+      <span className="corner-mark__measure" ref={measureRef} aria-hidden="true">
+        {currentText}
+      </span>
     </button>
   );
 }
