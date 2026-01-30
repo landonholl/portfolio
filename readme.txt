@@ -39,11 +39,3 @@ Supporting files such as robots.txt and sitemap.xml are included to enable prope
 
 This repository is provided for reference and portfolio purposes.
 All rights reserved unless otherwise stated.
-
-## Contact
-
-Website: https://landonholland.com
-
-GitHub: https://github.com/landonholl
-
-LinkedIn: https://linkedin.com/in/landon-holland-743113159
